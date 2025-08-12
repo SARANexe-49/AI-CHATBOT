@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>⚡ Catastrophic Chatbot</title>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Quicksand', sans-serif;
+      background: radial-gradient(circle at top, #1e1e2f, #0c0c1c);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+    .chat-wrapper {
+      backdrop-filter: blur(10px);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      width: 90%;
+      max-width: 450px;
+      height: 600px;
+      box-shadow: 0 0 25px rgba(138, 43, 226, 0.3);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+    .chat-header {
+      background: linear-gradient(90deg, #6a11cb, #2575fc);
+      color: white;
+      text-align: center;
+      padding: 16px;
+      font-size: 1.4rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+    .messages {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      color: #eee;
+    }
+    .message {
+      margin-bottom: 10px;
+      line-height: 1.5;
+      padding: 8px 12px;
+      border-radius: 8px;
+      max-width: 95%;
+    }
+    .message.user {
+      background: rgba(138, 43, 226, 0.2);
+      align-self: flex-end;
+      color: #fff;
+    }
+    .message.bot {
+      background: rgba(255, 255, 255, 0.05);
+      color: #eee;
+      align-self: flex-start;
+    }
+    .input-box {
+      display: flex;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.02);
+    }
+    input {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      outline: none;
+      font-size: 1rem;
+      background: transparent;
+      color: #fff;
+    }
+    button {
+      padding: 14px 20px;
+      background: #6a11cb;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #511bb8;
+    }
+    ::placeholder {
+      color: #bbb;
+    }
+    @media (max-width: 500px) {
+      .chat-wrapper {
+        height: 95vh;
+        border-radius: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-wrapper">
+    <div class="chat-header">⚡ 𝕾𝖆𝖓𝐳𝐳・𝖊𝖝𝖊 AI </div>
+    <div class="messages" id="chatBox"></div>
+    <div class="input-box">
+      <input type="text" id="userInput" placeholder="Shoot your question....!" />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <script>
+    async function sendMessage() {
+      const input = document.getElementById("userInput");
+      const chatBox = document.getElementById("chatBox");
+      const userText = input.value.trim();
+      if (!userText) return;
+
+      // Append user message
+      chatBox.innerHTML += `<div class="message user">🧑‍💻 ${userText}</div>`;
+      input.value = "";
+
+      try {
+        const res = await fetch("/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: userText })
+        });
+        const data = await res.json();
+
+        // Append each reply chunk separately
+        data.reply.forEach(chunk => {
+          chatBox.innerHTML += `<div class="message bot">🤖 ${chunk}</div>`;
+        });
+      } catch (err) {
+        chatBox.innerHTML += `<div class="message bot">⚠️ Server Error</div>`;
+        console.error("Fetch error:", err);
+      }
+
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    document.getElementById("userInput").addEventListener("keydown", function(event) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        sendMessage();
+      }
+    });
+  </script>
+</body>
+</html>
